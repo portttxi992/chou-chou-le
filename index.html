@@ -148,7 +148,7 @@
 
   <div class="container">
     <h1>抽抽樂</h1>
-    <p class="subtitle">🎲 按下按鈕，隨機抽取一張 AI 真人風格成人圖片</p>
+    <p class="subtitle">🎲 二次元色情 + AI 擬真色情 混合抽取</p>
 
     <button class="draw-btn" id="drawBtn" onclick="draw()">開 抽</button>
 
@@ -167,7 +167,7 @@
     </div>
 
     <div class="footer">
-      <p>圖片來源：Civitai（AI 真人 X/Mature）+ Pollinations（即時生成）</p>
+      <p>來源：二次元 (moe.jitsu / sex.nyan) + AI 擬真 (Civitai / Pollinations)</p>
       <p>本網站僅供娛樂，圖片版權屬於原作者 / 生成模型</p>
     </div>
   </div>
@@ -190,8 +190,8 @@
     const resultImg = document.getElementById('resultImg');
     const errorMsg = document.getElementById('errorMsg');
 
-    // 更明確的成人提示詞
-    const prompts = [
+    // AI 擬真成人提示詞
+    const realisticPrompts = [
       'photorealistic completely nude woman, detailed breasts and nipples, realistic skin texture, explicit, highly detailed, 8k',
       'ultra realistic naked female model, full frontal nude, detailed genitals, natural lighting, photorealistic',
       'photorealistic woman fully nude, explicit pose, detailed anatomy, soft lighting, sharp focus, 8k',
@@ -203,26 +203,51 @@
     ];
 
     const apis = [
-      // 1. Civitai - 強制只要 X 或 Mature 等級
+      // ===== 二次元色情 =====
+      // 1. moe.jitsu.top r18
       async () => {
-        const sorts = ['Newest', 'Most Reactions', 'Most Comments'];
+        const res = await fetch('https://moe.jitsu.top/img/?sort=r18&type=json&num=1');
+        const data = await res.json();
+        if (data.pics && data.pics.length > 0) return data.pics[0];
+        throw new Error('moe.jitsu failed');
+      },
+      // 2. sex.nyan.run r18
+      async () => {
+        const res = await fetch('https://sex.nyan.run/api/v2/?r18=true&num=1');
+        const data = await res.json();
+        if (data.success && data.data && data.data.length > 0) return data.data[0].url;
+        throw new Error('sex.nyan failed');
+      },
+
+      // ===== AI 擬真色情 =====
+      // 3. Civitai X / Mature
+      async () => {
+        const sorts = ['Newest', 'Most Reactions'];
         const sort = sorts[Math.floor(Math.random() * sorts.length)];
-        const res = await fetch(`https://civitai.com/api/v1/images?limit=50&nsfw=X&sort=${encodeURIComponent(sort)}`);
+        const res = await fetch(`https://civitai.com/api/v1/images?limit=40&nsfw=X&sort=${encodeURIComponent(sort)}`);
         const data = await res.json();
         const adult = (data.items || []).filter(i => i.nsfwLevel === 'X' || i.nsfwLevel === 'Mature');
         if (adult.length > 0) {
-          const item = adult[Math.floor(Math.random() * adult.length)];
-          return item.url;
+          return adult[Math.floor(Math.random() * adult.length)].url;
         }
-        throw new Error('No X/Mature images');
+        throw new Error('Civitai no X/Mature');
       },
-      // 2. Pollinations 即時生成（更明確成人）
+      // 4. Pollinations 即時生成
       async () => {
-        const prompt = prompts[Math.floor(Math.random() * prompts.length)];
+        const prompt = realisticPrompts[Math.floor(Math.random() * realisticPrompts.length)];
         const seed = Math.floor(Math.random() * 999999);
         return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=768&height=1024&seed=${seed}&nologo=true&model=flux`;
       }
     ];
+
+    // 隨機打亂順序，讓二次元與 AI 擬真機率接近
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
 
     async function draw() {
       drawBtn.disabled = true;
@@ -233,7 +258,10 @@
       let imageUrl = null;
       let lastError = null;
 
-      for (const api of apis) {
+      // 每次隨機打亂 API 順序，平衡二次元與 AI 擬真
+      const shuffled = shuffle([...apis]);
+
+      for (const api of shuffled) {
         try {
           imageUrl = await api();
           if (imageUrl) break;
