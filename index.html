@@ -22,6 +22,92 @@
       position: relative;
     }
 
+    /* ===== 年齡驗證遮罩 ===== */
+    #ageGate {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #0d0518 0%, #1a0a2e 50%, #2d1b4e 100%);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    #ageGate.hidden {
+      display: none;
+    }
+
+    .age-box {
+      text-align: center;
+      max-width: 420px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 105, 180, 0.3);
+      border-radius: 24px;
+      padding: 48px 32px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(12px);
+    }
+
+    .age-box h2 {
+      font-size: 1.8rem;
+      font-weight: 900;
+      margin-bottom: 12px;
+      background: linear-gradient(90deg, #ff69b4, #ff1493);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .age-box p {
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 1.05rem;
+      line-height: 1.6;
+      margin-bottom: 36px;
+    }
+
+    .age-btns {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .age-btn {
+      border: none;
+      font-size: 1.15rem;
+      font-weight: 700;
+      padding: 14px 40px;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      letter-spacing: 1px;
+    }
+
+    .age-btn.yes {
+      background: linear-gradient(135deg, #ff1493, #c71585);
+      color: #fff;
+      box-shadow: 0 6px 24px rgba(255, 20, 147, 0.45);
+    }
+
+    .age-btn.yes:hover {
+      transform: translateY(-3px) scale(1.04);
+      box-shadow: 0 10px 32px rgba(255, 20, 147, 0.6);
+    }
+
+    .age-btn.no {
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .age-btn.no:hover {
+      background: rgba(255, 255, 255, 0.18);
+      transform: translateY(-2px);
+    }
+
+    /* ===== 原本樣式 ===== */
     .particles {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       pointer-events: none; z-index: 0; overflow: hidden;
@@ -156,10 +242,23 @@
     @media (max-width: 600px) {
       .draw-btn { font-size: 1.2rem; padding: 14px 32px; }
       .image-wrapper img { max-height: 55vh; }
+      .age-box { padding: 36px 24px; }
     }
   </style>
 </head>
 <body>
+  <!-- 年齡驗證 -->
+  <div id="ageGate">
+    <div class="age-box">
+      <h2>🔞 年齡確認</h2>
+      <p>本網站包含成人內容<br>請問您是否已年滿 18 歲？</p>
+      <div class="age-btns">
+        <button class="age-btn yes" onclick="confirmAge(true)">是，已滿 18 歲</button>
+        <button class="age-btn no" onclick="confirmAge(false)">否</button>
+      </div>
+    </div>
+  </div>
+
   <div class="particles" id="particles"></div>
 
   <div class="container">
@@ -193,6 +292,24 @@
   </div>
 
   <script>
+    // ===== 年齡驗證 =====
+    function confirmAge(isAdult) {
+      if (isAdult) {
+        // 記住這次瀏覽器已確認（關掉分頁後會重問）
+        sessionStorage.setItem('ageVerified', 'true');
+        document.getElementById('ageGate').classList.add('hidden');
+      } else {
+        // 按「否」→ 跳轉到指定 YouTube
+        window.location.href = 'https://youtu.be/ESKTiYwV7iA?si=Bh5ROdaV0qRuxDBa';
+      }
+    }
+
+    // 如果這次瀏覽已經確認過，直接隱藏
+    if (sessionStorage.getItem('ageVerified') === 'true') {
+      document.getElementById('ageGate').classList.add('hidden');
+    }
+
+    // ===== 原本程式 =====
     const particlesContainer = document.getElementById('particles');
     for (let i = 0; i < 25; i++) {
       const p = document.createElement('div');
@@ -210,7 +327,6 @@
     const resultImg = document.getElementById('resultImg');
     const errorMsg = document.getElementById('errorMsg');
 
-    // AI 擬真成人提示詞
     const realisticPrompts = [
       'photorealistic completely nude woman, detailed breasts and nipples, realistic skin texture, explicit, highly detailed, 8k',
       'ultra realistic naked female model, full frontal nude, detailed genitals, natural lighting, photorealistic',
@@ -223,7 +339,6 @@
     ];
 
     const apis = [
-      // ===== 二次元色情 =====
       async () => {
         const res = await fetch('https://moe.jitsu.top/img/?sort=r18&type=json&num=1');
         const data = await res.json();
@@ -236,8 +351,6 @@
         if (data.success && data.data && data.data.length > 0) return data.data[0].url;
         throw new Error('sex.nyan failed');
       },
-
-      // ===== AI 擬真色情 =====
       async () => {
         const sorts = ['Newest', 'Most Reactions'];
         const sort = sorts[Math.floor(Math.random() * sorts.length)];
@@ -272,7 +385,6 @@
 
       let imageUrl = null;
       let lastError = null;
-
       const shuffled = shuffle([...apis]);
 
       for (const api of shuffled) {
@@ -306,9 +418,7 @@
       }
     }
 
-    // ========== 抽片片：隨機番號跳轉 missav.ai ==========
     const prefixes = [
-      // 常見主流番號前綴
       { code: 'SSIS', min: 1, max: 550, pad: 3 },
       { code: 'STARS', min: 1, max: 900, pad: 3 },
       { code: 'SONE', min: 1, max: 400, pad: 3 },
@@ -329,7 +439,6 @@
       { code: 'PPPE', min: 1, max: 300, pad: 3 },
       { code: 'MVSD', min: 1, max: 500, pad: 3 },
       { code: 'DLDSS', min: 1, max: 300, pad: 3 },
-      // FC2-PPV（通常是 6~7 位數）
       { code: 'FC2-PPV', min: 1000000, max: 4600000, pad: 0 }
     ];
 
@@ -339,7 +448,6 @@
 
       let code;
       if (pref.code === 'FC2-PPV') {
-        // FC2 格式：fc2-ppv-1234567
         code = `fc2-ppv-${num}`;
       } else {
         const padded = String(num).padStart(pref.pad, '0');
