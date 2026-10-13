@@ -187,7 +187,7 @@
 
     <div class="footer">
       <p>圖片來源：二次元 (moe.jitsu / sex.nyan) + AI 擬真 (Civitai / Pollinations)</p>
-      <p>片片：隨機番號跳轉 missav.ai（可能遇到 404，再按一次即可）</p>
+      <p>片片：隨機番號跳轉 missav.ai（含 FC2-PPV，可能遇到 404，再按一次即可）</p>
       <p>本網站僅供娛樂，圖片版權屬於原作者 / 生成模型</p>
     </div>
   </div>
@@ -308,43 +308,46 @@
 
     // ========== 抽片片：隨機番號跳轉 missav.ai ==========
     const prefixes = [
-      // 常見主流番號前綴（數字範圍大致合理）
-      { code: 'SSIS', min: 1, max: 550 },
-      { code: 'STARS', min: 1, max: 900 },
-      { code: 'SONE', min: 1, max: 400 },
-      { code: 'MIDV', min: 1, max: 800 },
-      { code: 'MIDE', min: 1, max: 900 },
-      { code: 'PRED', min: 1, max: 600 },
-      { code: 'IPZZ', min: 1, max: 400 },
-      { code: 'IPX', min: 1, max: 999 },
-      { code: 'JUQ', min: 1, max: 700 },
-      { code: 'JUL', min: 1, max: 999 },
-      { code: 'FSDSS', min: 1, max: 800 },
-      { code: 'START', min: 1, max: 200 },
-      { code: 'CAWD', min: 1, max: 700 },
-      { code: 'DASS', min: 1, max: 400 },
-      { code: 'ABF', min: 1, max: 200 },
-      { code: 'HMN', min: 1, max: 600 },
-      { code: 'WAAA', min: 1, max: 400 },
-      { code: 'PPPE', min: 1, max: 300 },
-      { code: 'MVSD', min: 1, max: 500 },
-      { code: 'DLDSS', min: 1, max: 300 }
+      // 常見主流番號前綴
+      { code: 'SSIS', min: 1, max: 550, pad: 3 },
+      { code: 'STARS', min: 1, max: 900, pad: 3 },
+      { code: 'SONE', min: 1, max: 400, pad: 3 },
+      { code: 'MIDV', min: 1, max: 800, pad: 3 },
+      { code: 'MIDE', min: 1, max: 900, pad: 3 },
+      { code: 'PRED', min: 1, max: 600, pad: 3 },
+      { code: 'IPZZ', min: 1, max: 400, pad: 3 },
+      { code: 'IPX', min: 1, max: 999, pad: 3 },
+      { code: 'JUQ', min: 1, max: 700, pad: 3 },
+      { code: 'JUL', min: 1, max: 999, pad: 3 },
+      { code: 'FSDSS', min: 1, max: 800, pad: 3 },
+      { code: 'START', min: 1, max: 200, pad: 3 },
+      { code: 'CAWD', min: 1, max: 700, pad: 3 },
+      { code: 'DASS', min: 1, max: 400, pad: 3 },
+      { code: 'ABF', min: 1, max: 200, pad: 3 },
+      { code: 'HMN', min: 1, max: 600, pad: 3 },
+      { code: 'WAAA', min: 1, max: 400, pad: 3 },
+      { code: 'PPPE', min: 1, max: 300, pad: 3 },
+      { code: 'MVSD', min: 1, max: 500, pad: 3 },
+      { code: 'DLDSS', min: 1, max: 300, pad: 3 },
+      // FC2-PPV（通常是 6~7 位數）
+      { code: 'FC2-PPV', min: 1000000, max: 4600000, pad: 0 }
     ];
 
     function drawVideo() {
       const pref = prefixes[Math.floor(Math.random() * prefixes.length)];
       const num = Math.floor(Math.random() * (pref.max - pref.min + 1)) + pref.min;
-      // 補零到 3 位數（常見格式）
-      const padded = String(num).padStart(3, '0');
-      const code = `${pref.code}-${padded}`;
 
-      // missav.ai 常見網址格式
+      let code;
+      if (pref.code === 'FC2-PPV') {
+        // FC2 格式：fc2-ppv-1234567
+        code = `fc2-ppv-${num}`;
+      } else {
+        const padded = String(num).padStart(pref.pad, '0');
+        code = `${pref.code}-${padded}`;
+      }
+
       const url = `https://missav.ai/${code.toLowerCase()}`;
-
-      // 開啟新分頁
       window.open(url, '_blank');
-
-      // 可選：在頁面上短暫提示抽到的番號
       console.log('抽到片片：', code, '→', url);
     }
 
