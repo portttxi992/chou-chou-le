@@ -26,7 +26,6 @@
       position: relative;
     }
 
-    /* 背景浮動粒子效果 */
     .particles {
       position: fixed;
       top: 0;
@@ -81,7 +80,6 @@
       margin-bottom: 40px;
     }
 
-    /* 抽卡按鈕 */
     .draw-btn {
       position: relative;
       background: linear-gradient(135deg, #ff1493, #c71585);
@@ -137,7 +135,6 @@
       opacity: 1;
     }
 
-    /* 結果區域 */
     .result-area {
       margin-top: 50px;
       min-height: 400px;
@@ -234,7 +231,6 @@
       display: block;
     }
 
-    /* 底部說明 */
     .footer {
       margin-top: 50px;
       font-size: 0.85rem;
@@ -242,12 +238,6 @@
       line-height: 1.6;
     }
 
-    .footer a {
-      color: #ff69b4;
-      text-decoration: none;
-    }
-
-    /* 響應式 */
     @media (max-width: 600px) {
       .draw-btn {
         font-size: 1.3rem;
@@ -264,7 +254,7 @@
 
   <div class="container">
     <h1>抽抽樂</h1>
-    <p class="subtitle">🎲 按下按鈕，隨機抽取一張成人圖片</p>
+    <p class="subtitle">🎲 按下按鈕，隨機抽取一張 AI 真人風格成人圖片</p>
 
     <button class="draw-btn" id="drawBtn" onclick="draw()">
       開 抽
@@ -287,13 +277,13 @@
     </div>
 
     <div class="footer">
-      <p>圖片來源：公開二次元 NSFW API（moe.jitsu.top）</p>
-      <p>本網站僅供娛樂，圖片版權屬於原作者</p>
+      <p>圖片來源：Civitai（AI 生成真人風格）+ Pollinations（即時生成）</p>
+      <p>本網站僅供娛樂，圖片版權屬於原作者 / 生成模型</p>
     </div>
   </div>
 
   <script>
-    // 建立背景粒子
+    // 背景粒子
     const particlesContainer = document.getElementById('particles');
     for (let i = 0; i < 25; i++) {
       const p = document.createElement('div');
@@ -311,30 +301,42 @@
     const resultImg = document.getElementById('resultImg');
     const errorMsg = document.getElementById('errorMsg');
 
-    // 可用的 API 來源（備用）
+    // 隨機真實感 prompt（給 Pollinations 用）
+    const prompts = [
+      'photorealistic beautiful woman nude, highly detailed skin, natural lighting, 8k',
+      'photorealistic attractive woman lingerie, realistic body, soft lighting, detailed',
+      'ultra realistic nude female model, perfect skin texture, cinematic lighting',
+      'photorealistic sexy woman, natural pose, high resolution, realistic photography',
+      'realistic beautiful girl nude, detailed face, soft shadows, photorealistic',
+      'photorealistic woman in lingerie, elegant pose, detailed skin, 8k uhd',
+      'hyper realistic nude woman, natural beauty, studio lighting, sharp focus',
+      'photorealistic attractive female, intimate pose, realistic skin, high detail'
+    ];
+
     const apis = [
-      // moe.jitsu.top - 直接回傳 JSON
+      // 1. Civitai - 真實 AI 生成圖庫（最快最穩）
       async () => {
-        const res = await fetch('https://moe.jitsu.top/img/?sort=r18&type=json&num=1');
+        // 隨機頁面增加多樣性
+        const page = Math.floor(Math.random() * 20) + 1;
+        const res = await fetch(`https://civitai.com/api/v1/images?limit=20&nsfw=X&sort=Most%20Reactions&page=${page}`);
         const data = await res.json();
-        if (data.pics && data.pics.length > 0) {
-          return data.pics[0];
+        if (data.items && data.items.length > 0) {
+          // 隨機挑一張
+          const item = data.items[Math.floor(Math.random() * data.items.length)];
+          return item.url;
         }
-        throw new Error('No image');
+        throw new Error('Civitai no image');
       },
-      // sex.nyan.run
+      // 2. Pollinations 即時生成（AI 真人）
       async () => {
-        const res = await fetch('https://sex.nyan.run/api/v2/?r18=true&num=1');
-        const data = await res.json();
-        if (data.success && data.data && data.data.length > 0) {
-          return data.data[0].url;
-        }
-        throw new Error('No image');
+        const prompt = prompts[Math.floor(Math.random() * prompts.length)];
+        const seed = Math.floor(Math.random() * 999999);
+        // 直接回傳圖片 URL（瀏覽器會自動載入）
+        return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=768&height=1024&seed=${seed}&nologo=true&model=flux`;
       }
     ];
 
     async function draw() {
-      // 重置狀態
       drawBtn.disabled = true;
       loading.classList.add('active');
       imageWrapper.classList.remove('active');
@@ -343,7 +345,6 @@
       let imageUrl = null;
       let lastError = null;
 
-      // 依序嘗試各個 API
       for (const api of apis) {
         try {
           imageUrl = await api();
@@ -357,7 +358,6 @@
       loading.classList.remove('active');
 
       if (imageUrl) {
-        // 預載圖片
         resultImg.onload = () => {
           imageWrapper.classList.add('active');
           drawBtn.disabled = false;
@@ -376,11 +376,8 @@
       }
     }
 
-    // 點擊圖片可在新分頁開啟
     resultImg.addEventListener('click', () => {
-      if (resultImg.src) {
-        window.open(resultImg.src, '_blank');
-      }
+      if (resultImg.src) window.open(resultImg.src, '_blank');
     });
     resultImg.style.cursor = 'pointer';
   </script>
