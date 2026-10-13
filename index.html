@@ -7,11 +7,7 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: 'Noto Sans TC', sans-serif;
@@ -27,225 +23,123 @@
     }
 
     .particles {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 0;
-      overflow: hidden;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 0; overflow: hidden;
     }
 
     .particle {
-      position: absolute;
-      width: 6px;
-      height: 6px;
-      background: rgba(255, 105, 180, 0.6);
-      border-radius: 50%;
+      position: absolute; width: 6px; height: 6px;
+      background: rgba(255, 105, 180, 0.6); border-radius: 50%;
       animation: float 12s infinite ease-in-out;
     }
 
     @keyframes float {
       0%, 100% { transform: translateY(100vh) scale(0); opacity: 0; }
-      10% { opacity: 1; }
-      90% { opacity: 1; }
+      10% { opacity: 1; } 90% { opacity: 1; }
       100% { transform: translateY(-20vh) scale(1); opacity: 0; }
     }
 
     .container {
-      position: relative;
-      z-index: 1;
-      text-align: center;
-      padding: 20px;
-      max-width: 900px;
-      width: 100%;
+      position: relative; z-index: 1; text-align: center;
+      padding: 20px; max-width: 900px; width: 100%;
     }
 
     h1 {
-      font-size: clamp(2.5rem, 8vw, 4.5rem);
-      font-weight: 900;
+      font-size: clamp(2.5rem, 8vw, 4.5rem); font-weight: 900;
       background: linear-gradient(90deg, #ff69b4, #ff1493, #ff69b4);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       background-clip: text;
       text-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
-      margin-bottom: 8px;
-      letter-spacing: 4px;
+      margin-bottom: 8px; letter-spacing: 4px;
     }
 
     .subtitle {
-      font-size: 1.1rem;
-      color: rgba(255, 255, 255, 0.7);
-      margin-bottom: 40px;
+      font-size: 1.1rem; color: rgba(255, 255, 255, 0.7); margin-bottom: 40px;
     }
 
     .draw-btn {
       position: relative;
       background: linear-gradient(135deg, #ff1493, #c71585);
-      border: none;
-      color: white;
-      font-size: 1.6rem;
-      font-weight: 700;
-      padding: 18px 60px;
-      border-radius: 60px;
-      cursor: pointer;
-      box-shadow: 0 8px 30px rgba(255, 20, 147, 0.5),
-                  0 0 0 4px rgba(255, 105, 180, 0.2);
-      transition: all 0.3s ease;
-      letter-spacing: 3px;
-      overflow: hidden;
+      border: none; color: white; font-size: 1.6rem; font-weight: 700;
+      padding: 18px 60px; border-radius: 60px; cursor: pointer;
+      box-shadow: 0 8px 30px rgba(255, 20, 147, 0.5), 0 0 0 4px rgba(255, 105, 180, 0.2);
+      transition: all 0.3s ease; letter-spacing: 3px; overflow: hidden;
     }
 
     .draw-btn:hover {
       transform: translateY(-4px) scale(1.05);
-      box-shadow: 0 12px 40px rgba(255, 20, 147, 0.7),
-                  0 0 0 6px rgba(255, 105, 180, 0.3);
+      box-shadow: 0 12px 40px rgba(255, 20, 147, 0.7), 0 0 0 6px rgba(255, 105, 180, 0.3);
     }
 
-    .draw-btn:active {
-      transform: translateY(0) scale(0.98);
-    }
-
-    .draw-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
+    .draw-btn:active { transform: translateY(0) scale(0.98); }
+    .draw-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
     .draw-btn::after {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(
-        transparent,
-        rgba(255, 255, 255, 0.2),
-        transparent
-      );
-      transform: rotate(45deg);
-      transition: all 0.6s;
-      opacity: 0;
+      content: ''; position: absolute; top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: linear-gradient(transparent, rgba(255,255,255,0.2), transparent);
+      transform: rotate(45deg); transition: all 0.6s; opacity: 0;
     }
-
-    .draw-btn:hover::after {
-      left: 100%;
-      opacity: 1;
-    }
+    .draw-btn:hover::after { left: 100%; opacity: 1; }
 
     .result-area {
-      margin-top: 50px;
-      min-height: 400px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      margin-top: 50px; min-height: 400px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
 
-    .loading {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .loading.active {
-      display: flex;
-    }
+    .loading { display: none; flex-direction: column; align-items: center; gap: 20px; }
+    .loading.active { display: flex; }
 
     .spinner {
-      width: 60px;
-      height: 60px;
+      width: 60px; height: 60px;
       border: 5px solid rgba(255, 105, 180, 0.3);
-      border-top-color: #ff1493;
-      border-radius: 50%;
+      border-top-color: #ff1493; border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     .loading-text {
-      font-size: 1.2rem;
-      color: #ff69b4;
+      font-size: 1.2rem; color: #ff69b4;
       animation: pulse 1.5s ease-in-out infinite;
     }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 0.6; }
-      50% { opacity: 1; }
-    }
+    @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
 
     .image-wrapper {
-      display: none;
-      position: relative;
-      max-width: 100%;
+      display: none; position: relative; max-width: 100%;
       animation: reveal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-
-    .image-wrapper.active {
-      display: block;
-    }
+    .image-wrapper.active { display: block; }
 
     @keyframes reveal {
-      0% {
-        opacity: 0;
-        transform: scale(0.5) rotate(-5deg);
-      }
-      100% {
-        opacity: 1;
-        transform: scale(1) rotate(0);
-      }
+      0% { opacity: 0; transform: scale(0.5) rotate(-5deg); }
+      100% { opacity: 1; transform: scale(1) rotate(0); }
     }
 
     .image-wrapper img {
-      max-width: 100%;
-      max-height: 70vh;
-      border-radius: 16px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
-                  0 0 0 3px rgba(255, 105, 180, 0.4);
-      display: block;
-      object-fit: contain;
+      max-width: 100%; max-height: 70vh; border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 3px rgba(255,105,180,0.4);
+      display: block; object-fit: contain;
     }
 
     .image-caption {
-      margin-top: 16px;
-      font-size: 0.95rem;
-      color: rgba(255, 255, 255, 0.6);
+      margin-top: 16px; font-size: 0.95rem; color: rgba(255,255,255,0.6);
     }
 
     .error-msg {
-      display: none;
-      color: #ff6b6b;
-      background: rgba(255, 107, 107, 0.15);
-      padding: 20px 30px;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 107, 107, 0.3);
-      max-width: 400px;
+      display: none; color: #ff6b6b;
+      background: rgba(255,107,107,0.15); padding: 20px 30px;
+      border-radius: 12px; border: 1px solid rgba(255,107,107,0.3); max-width: 400px;
     }
-
-    .error-msg.active {
-      display: block;
-    }
+    .error-msg.active { display: block; }
 
     .footer {
-      margin-top: 50px;
-      font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.4);
-      line-height: 1.6;
+      margin-top: 50px; font-size: 0.85rem;
+      color: rgba(255,255,255,0.4); line-height: 1.6;
     }
 
     @media (max-width: 600px) {
-      .draw-btn {
-        font-size: 1.3rem;
-        padding: 16px 40px;
-      }
-      .image-wrapper img {
-        max-height: 55vh;
-      }
+      .draw-btn { font-size: 1.3rem; padding: 16px 40px; }
+      .image-wrapper img { max-height: 55vh; }
     }
   </style>
 </head>
@@ -256,9 +150,7 @@
     <h1>抽抽樂</h1>
     <p class="subtitle">🎲 按下按鈕，隨機抽取一張 AI 真人風格成人圖片</p>
 
-    <button class="draw-btn" id="drawBtn" onclick="draw()">
-      開 抽
-    </button>
+    <button class="draw-btn" id="drawBtn" onclick="draw()">開 抽</button>
 
     <div class="result-area">
       <div class="loading" id="loading">
@@ -271,19 +163,16 @@
         <p class="image-caption">點擊圖片可放大 · 再按「開抽」可繼續抽</p>
       </div>
 
-      <div class="error-msg" id="errorMsg">
-        抽卡失敗了，請再試一次！
-      </div>
+      <div class="error-msg" id="errorMsg">抽卡失敗了，請再試一次！</div>
     </div>
 
     <div class="footer">
-      <p>圖片來源：Civitai（AI 生成真人風格）+ Pollinations（即時生成）</p>
+      <p>圖片來源：Civitai（AI 真人 X/Mature）+ Pollinations（即時生成）</p>
       <p>本網站僅供娛樂，圖片版權屬於原作者 / 生成模型</p>
     </div>
   </div>
 
   <script>
-    // 背景粒子
     const particlesContainer = document.getElementById('particles');
     for (let i = 0; i < 25; i++) {
       const p = document.createElement('div');
@@ -301,37 +190,36 @@
     const resultImg = document.getElementById('resultImg');
     const errorMsg = document.getElementById('errorMsg');
 
-    // 隨機真實感 prompt（給 Pollinations 用）
+    // 更明確的成人提示詞
     const prompts = [
-      'photorealistic beautiful woman nude, highly detailed skin, natural lighting, 8k',
-      'photorealistic attractive woman lingerie, realistic body, soft lighting, detailed',
-      'ultra realistic nude female model, perfect skin texture, cinematic lighting',
-      'photorealistic sexy woman, natural pose, high resolution, realistic photography',
-      'realistic beautiful girl nude, detailed face, soft shadows, photorealistic',
-      'photorealistic woman in lingerie, elegant pose, detailed skin, 8k uhd',
-      'hyper realistic nude woman, natural beauty, studio lighting, sharp focus',
-      'photorealistic attractive female, intimate pose, realistic skin, high detail'
+      'photorealistic completely nude woman, detailed breasts and nipples, realistic skin texture, explicit, highly detailed, 8k',
+      'ultra realistic naked female model, full frontal nude, detailed genitals, natural lighting, photorealistic',
+      'photorealistic woman fully nude, explicit pose, detailed anatomy, soft lighting, sharp focus, 8k',
+      'realistic nude woman on bed, explicit, detailed body, natural skin, cinematic lighting',
+      'photorealistic naked girl, complete nudity, detailed breasts, realistic photography style',
+      'hyper realistic fully nude female, explicit content, perfect skin, studio lighting, 8k uhd',
+      'photorealistic woman undressed, nude, detailed intimate areas, high resolution, realistic',
+      'ultra detailed photorealistic nude woman, explicit, natural pose, sharp focus, 8k'
     ];
 
     const apis = [
-      // 1. Civitai - 真實 AI 生成圖庫（最快最穩）
+      // 1. Civitai - 強制只要 X 或 Mature 等級
       async () => {
-        // 隨機頁面增加多樣性
-        const page = Math.floor(Math.random() * 20) + 1;
-        const res = await fetch(`https://civitai.com/api/v1/images?limit=20&nsfw=X&sort=Most%20Reactions&page=${page}`);
+        const sorts = ['Newest', 'Most Reactions', 'Most Comments'];
+        const sort = sorts[Math.floor(Math.random() * sorts.length)];
+        const res = await fetch(`https://civitai.com/api/v1/images?limit=50&nsfw=X&sort=${encodeURIComponent(sort)}`);
         const data = await res.json();
-        if (data.items && data.items.length > 0) {
-          // 隨機挑一張
-          const item = data.items[Math.floor(Math.random() * data.items.length)];
+        const adult = (data.items || []).filter(i => i.nsfwLevel === 'X' || i.nsfwLevel === 'Mature');
+        if (adult.length > 0) {
+          const item = adult[Math.floor(Math.random() * adult.length)];
           return item.url;
         }
-        throw new Error('Civitai no image');
+        throw new Error('No X/Mature images');
       },
-      // 2. Pollinations 即時生成（AI 真人）
+      // 2. Pollinations 即時生成（更明確成人）
       async () => {
         const prompt = prompts[Math.floor(Math.random() * prompts.length)];
         const seed = Math.floor(Math.random() * 999999);
-        // 直接回傳圖片 URL（瀏覽器會自動載入）
         return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=768&height=1024&seed=${seed}&nologo=true&model=flux`;
       }
     ];
