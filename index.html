@@ -153,9 +153,8 @@
     }
     .error-msg.active { display: block; }
 
-    /* ===== 歷史紀錄 ===== */
     .history-section {
-      margin-top: 40px;
+      margin-top: 36px;
       width: 100%;
       max-width: 520px;
       text-align: left;
@@ -198,11 +197,10 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 14px;
+      padding: 10px 12px;
       border-radius: 10px;
-      cursor: pointer;
       transition: background 0.2s;
-      gap: 10px;
+      gap: 8px;
     }
     .history-item:hover {
       background: rgba(255,105,180,0.12);
@@ -212,11 +210,30 @@
       color: #ff69b4;
       font-size: 0.95rem;
       letter-spacing: 0.5px;
+      cursor: pointer;
+      flex: 1;
+      text-align: left;
     }
+    .history-code:hover { text-decoration: underline; }
     .history-time {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: rgba(255,255,255,0.4);
       white-space: nowrap;
+    }
+    .fav-btn {
+      background: none;
+      border: none;
+      font-size: 1.15rem;
+      cursor: pointer;
+      padding: 2px 6px;
+      line-height: 1;
+      transition: transform 0.15s;
+      opacity: 0.55;
+    }
+    .fav-btn:hover { transform: scale(1.2); opacity: 1; }
+    .fav-btn.active {
+      opacity: 1;
+      filter: drop-shadow(0 0 4px #ffd700);
     }
     .history-empty {
       text-align: center;
@@ -274,10 +291,21 @@
       <div class="error-msg" id="errorMsg">抽卡失敗了，請再試一次！</div>
     </div>
 
+    <!-- 我的最愛 -->
+    <div class="history-section">
+      <div class="history-header">
+        <h3>⭐ 我的最愛</h3>
+        <button class="clear-btn" onclick="clearFavorites()">清空</button>
+      </div>
+      <div class="history-list" id="favList">
+        <div class="history-empty">還沒有最愛，在歷史裡按 ★ 加入吧</div>
+      </div>
+    </div>
+
     <!-- 片片歷史紀錄 -->
     <div class="history-section">
       <div class="history-header">
-        <h3>📋 抽片片歷史（最近 20 筆）</h3>
+        <h3>📋 抽片片歷史（最近 50 筆）</h3>
         <button class="clear-btn" onclick="clearHistory()">清空</button>
       </div>
       <div class="history-list" id="historyList">
@@ -411,7 +439,6 @@
       }
     }
 
-    // ===== 番號前綴 =====
     const prefixes = [
       { code: 'SSIS', min: 1, max: 550, pad: 3 },
       { code: 'STARS', min: 1, max: 900, pad: 3 },
@@ -438,20 +465,42 @@
       { code: 'FC2-PPV', min: 1000000, max: 4600000, pad: 0 }
     ];
 
-    // ===== 歷史紀錄 =====
+    // ===== 歷史 & 最愛 =====
     const HISTORY_KEY = 'chouVideoHistory';
-    const MAX_HISTORY = 20;
+    const FAV_KEY = 'chouVideoFavorites';
+    const MAX_HISTORY = 50;
 
     function getHistory() {
-      try {
-        return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
-      } catch {
-        return [];
-      }
+      try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); }
+      catch { return []; }
     }
-
     function saveHistory(list) {
       localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(0, MAX_HISTORY)));
+    }
+    function getFavorites() {
+      try { return JSON.parse(localStorage.getItem(FAV_KEY) || '[]'); }
+      catch { return []; }
+    }
+    function saveFavorites(list) {
+      localStorage.setItem(FAV_KEY, JSON.stringify(list));
+    }
+
+    function isFav(code) {
+      return getFavorites().some(f => f.code === code);
+    }
+
+    function toggleFavorite(code, url, event) {
+      if (event) event.stopPropagation();
+      let list = getFavorites();
+      const idx = list.findIndex(f => f.code === code);
+      if (idx >= 0) {
+        list.splice(idx, 1);
+      } else {
+        list.unshift({ code, url, time: Date.now() });
+      }
+      saveFavorites(list);
+      renderFavorites();
+      renderHistory();
     }
 
     function addToHistory(code, url) {
@@ -464,6 +513,14 @@
     function clearHistory() {
       if (confirm('確定要清空所有抽片片歷史嗎？')) {
         localStorage.removeItem(HISTORY_KEY);
+        renderHistory();
+      }
+    }
+
+    function clearFavorites() {
+      if (confirm('確定要清空所有最愛嗎？')) {
+        localStorage.removeItem(FAV_KEY);
+        renderFavorites();
         renderHistory();
       }
     }
@@ -483,16 +540,36 @@
         el.innerHTML = '<div class="history-empty">還沒有紀錄，按「抽片片」開始吧</div>';
         return;
       }
+      el.innerHTML = list.map(item => {
+        const active = isFav(item.code) ? 'active' : '';
+        const star = isFav(item.code) ? '★' : '☆';
+        return `
+        <div class="history-item">
+          <button class="fav-btn ${active}" onclick="toggleFavorite('${item.code}', '${item.url}', event)" title="加入/取消最愛">${star}</button>
+          <span class="history-code" onclick="window.open('${item.url}', '_blank')">${item.code}</span>
+          <span class="history-time">${timeAgo(item.time)}</span>
+        </div>`;
+      }).join('');
+    }
+
+    function renderFavorites() {
+      const list = getFavorites();
+      const el = document.getElementById('favList');
+      if (list.length === 0) {
+        el.innerHTML = '<div class="history-empty">還沒有最愛，在歷史裡按 ★ 加入吧</div>';
+        return;
+      }
       el.innerHTML = list.map(item => `
-        <div class="history-item" onclick="window.open('${item.url}', '_blank')">
-          <span class="history-code">${item.code}</span>
+        <div class="history-item">
+          <button class="fav-btn active" onclick="toggleFavorite('${item.code}', '${item.url}', event)" title="取消最愛">★</button>
+          <span class="history-code" onclick="window.open('${item.url}', '_blank')">${item.code}</span>
           <span class="history-time">${timeAgo(item.time)}</span>
         </div>
       `).join('');
     }
 
-    // 初始化顯示歷史
     renderHistory();
+    renderFavorites();
 
     function drawVideo() {
       const pref = prefixes[Math.floor(Math.random() * prefixes.length)];
