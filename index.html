@@ -57,18 +57,34 @@
       font-size: 1.1rem; color: rgba(255, 255, 255, 0.7); margin-bottom: 40px;
     }
 
+    .btn-group {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
     .draw-btn {
       position: relative;
       background: linear-gradient(135deg, #ff1493, #c71585);
-      border: none; color: white; font-size: 1.6rem; font-weight: 700;
-      padding: 18px 60px; border-radius: 60px; cursor: pointer;
+      border: none; color: white; font-size: 1.5rem; font-weight: 700;
+      padding: 16px 48px; border-radius: 60px; cursor: pointer;
       box-shadow: 0 8px 30px rgba(255, 20, 147, 0.5), 0 0 0 4px rgba(255, 105, 180, 0.2);
-      transition: all 0.3s ease; letter-spacing: 3px; overflow: hidden;
+      transition: all 0.3s ease; letter-spacing: 2px; overflow: hidden;
+    }
+
+    .draw-btn.video-btn {
+      background: linear-gradient(135deg, #9b59b6, #8e44ad);
+      box-shadow: 0 8px 30px rgba(155, 89, 182, 0.5), 0 0 0 4px rgba(155, 89, 182, 0.2);
     }
 
     .draw-btn:hover {
       transform: translateY(-4px) scale(1.05);
       box-shadow: 0 12px 40px rgba(255, 20, 147, 0.7), 0 0 0 6px rgba(255, 105, 180, 0.3);
+    }
+
+    .draw-btn.video-btn:hover {
+      box-shadow: 0 12px 40px rgba(155, 89, 182, 0.7), 0 0 0 6px rgba(155, 89, 182, 0.3);
     }
 
     .draw-btn:active { transform: translateY(0) scale(0.98); }
@@ -138,7 +154,7 @@
     }
 
     @media (max-width: 600px) {
-      .draw-btn { font-size: 1.3rem; padding: 16px 40px; }
+      .draw-btn { font-size: 1.2rem; padding: 14px 32px; }
       .image-wrapper img { max-height: 55vh; }
     }
   </style>
@@ -150,7 +166,10 @@
     <h1>抽抽樂</h1>
     <p class="subtitle">🎲 二次元色情 + AI 擬真色情 混合抽取</p>
 
-    <button class="draw-btn" id="drawBtn" onclick="draw()">開 抽</button>
+    <div class="btn-group">
+      <button class="draw-btn" id="drawBtn" onclick="draw()">開 抽</button>
+      <button class="draw-btn video-btn" id="videoBtn" onclick="drawVideo()">抽 片 片</button>
+    </div>
 
     <div class="result-area">
       <div class="loading" id="loading">
@@ -167,7 +186,8 @@
     </div>
 
     <div class="footer">
-      <p>來源：二次元 (moe.jitsu / sex.nyan) + AI 擬真 (Civitai / Pollinations)</p>
+      <p>圖片來源：二次元 (moe.jitsu / sex.nyan) + AI 擬真 (Civitai / Pollinations)</p>
+      <p>片片：隨機番號跳轉 missav.ai（可能遇到 404，再按一次即可）</p>
       <p>本網站僅供娛樂，圖片版權屬於原作者 / 生成模型</p>
     </div>
   </div>
@@ -204,14 +224,12 @@
 
     const apis = [
       // ===== 二次元色情 =====
-      // 1. moe.jitsu.top r18
       async () => {
         const res = await fetch('https://moe.jitsu.top/img/?sort=r18&type=json&num=1');
         const data = await res.json();
         if (data.pics && data.pics.length > 0) return data.pics[0];
         throw new Error('moe.jitsu failed');
       },
-      // 2. sex.nyan.run r18
       async () => {
         const res = await fetch('https://sex.nyan.run/api/v2/?r18=true&num=1');
         const data = await res.json();
@@ -220,7 +238,6 @@
       },
 
       // ===== AI 擬真色情 =====
-      // 3. Civitai X / Mature
       async () => {
         const sorts = ['Newest', 'Most Reactions'];
         const sort = sorts[Math.floor(Math.random() * sorts.length)];
@@ -232,7 +249,6 @@
         }
         throw new Error('Civitai no X/Mature');
       },
-      // 4. Pollinations 即時生成
       async () => {
         const prompt = realisticPrompts[Math.floor(Math.random() * realisticPrompts.length)];
         const seed = Math.floor(Math.random() * 999999);
@@ -240,7 +256,6 @@
       }
     ];
 
-    // 隨機打亂順序，讓二次元與 AI 擬真機率接近
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -258,7 +273,6 @@
       let imageUrl = null;
       let lastError = null;
 
-      // 每次隨機打亂 API 順序，平衡二次元與 AI 擬真
       const shuffled = shuffle([...apis]);
 
       for (const api of shuffled) {
@@ -290,6 +304,48 @@
         drawBtn.disabled = false;
         console.error(lastError);
       }
+    }
+
+    // ========== 抽片片：隨機番號跳轉 missav.ai ==========
+    const prefixes = [
+      // 常見主流番號前綴（數字範圍大致合理）
+      { code: 'SSIS', min: 1, max: 550 },
+      { code: 'STARS', min: 1, max: 900 },
+      { code: 'SONE', min: 1, max: 400 },
+      { code: 'MIDV', min: 1, max: 800 },
+      { code: 'MIDE', min: 1, max: 900 },
+      { code: 'PRED', min: 1, max: 600 },
+      { code: 'IPZZ', min: 1, max: 400 },
+      { code: 'IPX', min: 1, max: 999 },
+      { code: 'JUQ', min: 1, max: 700 },
+      { code: 'JUL', min: 1, max: 999 },
+      { code: 'FSDSS', min: 1, max: 800 },
+      { code: 'START', min: 1, max: 200 },
+      { code: 'CAWD', min: 1, max: 700 },
+      { code: 'DASS', min: 1, max: 400 },
+      { code: 'ABF', min: 1, max: 200 },
+      { code: 'HMN', min: 1, max: 600 },
+      { code: 'WAAA', min: 1, max: 400 },
+      { code: 'PPPE', min: 1, max: 300 },
+      { code: 'MVSD', min: 1, max: 500 },
+      { code: 'DLDSS', min: 1, max: 300 }
+    ];
+
+    function drawVideo() {
+      const pref = prefixes[Math.floor(Math.random() * prefixes.length)];
+      const num = Math.floor(Math.random() * (pref.max - pref.min + 1)) + pref.min;
+      // 補零到 3 位數（常見格式）
+      const padded = String(num).padStart(3, '0');
+      const code = `${pref.code}-${padded}`;
+
+      // missav.ai 常見網址格式
+      const url = `https://missav.ai/${code.toLowerCase()}`;
+
+      // 開啟新分頁
+      window.open(url, '_blank');
+
+      // 可選：在頁面上短暫提示抽到的番號
+      console.log('抽到片片：', code, '→', url);
     }
 
     resultImg.addEventListener('click', () => {
